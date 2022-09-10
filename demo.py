@@ -13,7 +13,7 @@ class StableDiffusionDemo:
     def __init__(self):
         # create translation pipeline from Finnish to English
         tokenizer = AutoTokenizer.from_pretrained(self.translation_model_name)
-        translation_model = AutoModelForSeq2SeqLM.from_pretrained(self.translation_model_name)
+        translation_model = AutoModelForSeq2SeqLM.from_pretrained(self.translation_model_name).eval()
         self.translator = TranslationPipeline(translation_model, tokenizer)
         # load the stable diffusion model
         self.diffuser = StableDiffusionPipeline.from_pretrained(
@@ -23,6 +23,7 @@ class StableDiffusionDemo:
             use_auth_token=True,
         ).to("cuda")
     
+    @torch.no_grad()
     def __call__(self, prompt: str) -> Image:
         with autocast("cuda"):
             prompt = self.translator(prompt)[0]["translation_text"]
